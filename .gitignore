@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/.vagrant
 .env
 .env.backup
 .env.production

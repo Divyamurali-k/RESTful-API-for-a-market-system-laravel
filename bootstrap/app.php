@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -75,6 +76,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error' => $e->getMessage()
             ], $e->getStatusCode());
         });
+
+        $exceptions->render(function (QueryException $e, Request $request) {
+            // You might want to handle different SQL error codes here
+            if ($e->errorInfo[1] == 1451) { // Foreign key constraint fails
+                return response()->json([
+                    'error' => 'Cannot remove this resource permanently. It is related to another resource.'
+                ], 409);
+            }
+
+            // Handle other SQL exceptions as needed
+            return response()->json([
+                'error' => 'Database query error.'
+            ], 500);
+        });
+
 
         // Default handling for other exceptions
         $exceptions->render(function (Throwable $e, Request $request) {

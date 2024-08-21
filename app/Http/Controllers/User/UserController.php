@@ -27,14 +27,14 @@ class UserController extends ApiController
      */
     public function store(Request $request)
     {
-        // $rules = [
-        //     'name' => 'required',
-        //     'email' => 'required|email|unique:users',
-        //     'password' => 'required|min:6|confirmed',
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|confirmed',
 
-        // ];
+        ];
 
-        // $this->validate($request, $rules);
+        $this->validate($request, $rules);
 
         $data = $request->all();
         $data['password'] = bcrypt($request->password);

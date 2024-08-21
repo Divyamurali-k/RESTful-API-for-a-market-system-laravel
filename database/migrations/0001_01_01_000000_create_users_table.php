@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('verification_token')->nullable();
             $table->string('admin')->default(User::REGULAR_USER);
             $table->timestamps();
+            $table->softDeletes();//deleted_at
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
