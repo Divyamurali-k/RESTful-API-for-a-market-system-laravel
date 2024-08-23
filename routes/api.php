@@ -25,7 +25,6 @@ use App\Http\Controllers\Seller\SellerTransactionController;
 use App\Http\Controllers\Transaction\TransactionController;
 use App\Http\Controllers\Transaction\TransactionCategoryController;
 use App\Http\Controllers\Transaction\TransactionSellerController;
-
 use App\Http\Controllers\User\UserController;
 
 // Route::get('/user', function (Request $request) {
@@ -69,4 +68,7 @@ Route::resource('transactions.sellers',TransactionSellerController::class,['only
 
 // Users api routes
 Route::resource('users',UserController::class,['except' => ['create','edit']]);
+Route::get('users/verify/{token}', [UserController::class, 'verify'])->name('verify');
+Route::get('users/{user}/resend', [UserController::class, 'resend'])->name('resend');
+
 
