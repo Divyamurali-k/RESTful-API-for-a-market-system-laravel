@@ -11,6 +11,7 @@ class Transaction extends Model
     use HasFactory,SoftDeletes;
 
     protected $dates=['deleted_at'];
+    
     protected $fillable = [
         'quantity',
         'buyer_id',
