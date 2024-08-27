@@ -42,12 +42,12 @@ class UserTransformer extends TransformerAbstract
             'lastChange' => (string)$user->updated_at,
             'deletedDate' => isset($user->deleted_at) ? (string) $user->deleted_at : null,
 
-            // 'links' => [
-            //     [
-            //         'rel' => 'self',
-            //         'href' => route('users.show', $user->id),
-            //     ],
-            // ]
+            'links' => [
+                [
+                    'rel' => 'self',
+                    'href' => route('users.show', $user->id),
+                ],
+            ]
         ];
     }
     public static function originalAttribute($index)

@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 trait ApiResponser
 {
@@ -31,7 +32,7 @@ trait ApiResponser
         $collection = $this->sortData($collection, $transformer);
         $collection = $this->paginate($collection);
         $collection = $this->transformData($collection, $transformer);
-        // $collection = $this->cacheResponse($collection);		
+        $collection = $this->cacheResponse($collection);
 
         return $this->successResponse($collection, $code);
         // return $this->successResponse(['data' => $collection], $code);
@@ -51,17 +52,17 @@ trait ApiResponser
     }
 
     protected function filterData(Collection $collection, $transformer)
-	{
-		foreach (request()->query() as $query => $value) {
-			$attribute = $transformer::originalAttribute($query);
+    {
+        foreach (request()->query() as $query => $value) {
+            $attribute = $transformer::originalAttribute($query);
 
-			if (isset($attribute, $value)) {
-				$collection = $collection->where($attribute, $value);
-			}
-		}
+            if (isset($attribute, $value)) {
+                $collection = $collection->where($attribute, $value);
+            }
+        }
 
-		return $collection;
-	}
+        return $collection;
+    }
 
     protected function sortData(Collection $collection, $transformer)
     {
@@ -75,35 +76,50 @@ trait ApiResponser
     }
 
     protected function paginate(Collection $collection)
-	{
-		$rules = [
-			'per_page' => 'integer|min:2|max:50',
-		];
+    {
+        $rules = [
+            'per_page' => 'integer|min:2|max:50',
+        ];
 
-		Validator::validate(request()->all(), $rules);
+        Validator::validate(request()->all(), $rules);
 
-		$page = LengthAwarePaginator::resolveCurrentPage();
+        $page = LengthAwarePaginator::resolveCurrentPage();
 
-		$perPage = 15;
-		if (request()->has('per_page')) {
-			$perPage = (int) request()->per_page;
-		}
+        $perPage = 15;
+        if (request()->has('per_page')) {
+            $perPage = (int) request()->per_page;
+        }
 
-		$results = $collection->slice(($page - 1) * $perPage, $perPage)->values();
+        $results = $collection->slice(($page - 1) * $perPage, $perPage)->values();
 
-		$paginated = new LengthAwarePaginator($results, $collection->count(), $perPage, $page, [
-			'path' => LengthAwarePaginator::resolveCurrentPath(),
-		]);
+        $paginated = new LengthAwarePaginator($results, $collection->count(), $perPage, $page, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+        ]);
 
-		$paginated->appends(request()->all());
+        $paginated->appends(request()->all());
 
-		return $paginated;
-
-	}
+        return $paginated;
+    }
 
     protected function transformData($data, $transformer)
     {
         $transformation = fractal($data, new $transformer);
         return $transformation->toArray();
+    }
+
+    protected function cacheResponse($data)
+    {
+        $url = request()->url();
+        $queryParams = request()->query();
+
+        ksort($queryParams);
+
+        $queryString = http_build_query($queryParams);
+
+        $fullUrl = "{$url}?{$queryString}";
+
+        return Cache::remember($fullUrl, 30 / 60, function () use ($data) {
+            return $data;
+        });
     }
 }
