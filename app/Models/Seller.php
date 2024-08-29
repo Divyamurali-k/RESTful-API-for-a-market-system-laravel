@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Seller extends Model
+class Seller extends User
 {
     use HasFactory,SoftDeletes;
 
-    protected $table = 'users';
+    // protected $table = 'users';
     protected $dates=['deleted_at'];
     public $transformer = SellerTransformer::class;
 

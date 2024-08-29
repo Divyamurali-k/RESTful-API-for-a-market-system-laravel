@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SignatureMiddleware;
+use App\Http\Middleware\TransformInput;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -32,9 +33,12 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'transform.input' => TransformInput::class,
+        ]);
+        // $middleware->append(TransformInput::class);
         $middleware->group('web', [
             \App\Http\Middleware\SignatureMiddleware::class,
-
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -47,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->group('api', [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \App\Http\Middleware\SignatureMiddleware::class,
+
             'throttle:50,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
@@ -55,44 +60,44 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (ValidationException $e, Request $request) {
             return response()->json([
-                'errors' => $e->errors()
+                'errors' => $e->errors(),'code'=>'422'
             ], 422);
         });
 
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
             $modelName = strtolower(class_basename($e->getModel()));
             return response()->json([
-                'error' => "No {$modelName} found with the specified identifier."
+                'error' => "No {$modelName} found with the specified identifier.",'code'=>'404'
             ], 404);
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             return response()->json([
-                'error' => 'Unauthenticated.'
+                'error' => 'Unauthenticated.','code'=>'401'
             ], 401);
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {
             return response()->json([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),'code'=>'403'
             ], 403);
         });
 
         $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             return response()->json([
-                'error' => 'The specified method for the request is invalid.'
+                'error' => 'The specified method for the request is invalid.','code'=>'405'
             ], 405);
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             return response()->json([
-                'error' => 'The specified URL cannot be found.'
+                'error' => 'The specified URL cannot be found.','code'=>'404'
             ], 404);
         });
 
         $exceptions->render(function (HttpException $e, Request $request) {
             return response()->json([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),'code'=> $e->getStatusCode()
             ], $e->getStatusCode());
         });
 
@@ -100,13 +105,13 @@ return Application::configure(basePath: dirname(__DIR__))
             // You might want to handle different SQL error codes here
             if ($e->errorInfo[1] == 1451) { // Foreign key constraint fails
                 return response()->json([
-                    'error' => 'Cannot remove this resource permanently. It is related to another resource.'
+                    'error' => 'Cannot remove this resource permanently. It is related to another resource.','code'=>'409'
                 ], 409);
             }
 
             // Handle other SQL exceptions as needed
             return response()->json([
-                'error' => 'Database query error.'
+                'error' => 'Database query error.','code'=>'500'
             ], 500);
         });
 
@@ -127,5 +132,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error' => 'Unexpected Exception. Try again later.'
             ], 500);
         });
+
+        $exceptions->render(function (ValidationException $e, $request) {
+            $errors = $e->validator->errors()->getMessages();
+            if ($this->isFrontend($request)) {
+                return $request->ajax() ? response()->json($errors, 422) : redirect()
+                    ->back()
+                    ->withInput($request->input())
+                    ->withErrors($errors);
+            }
+            return $this->errorResponse($errors, 422);
+        });
+        
+        
     })
     ->create();
+    
+
+    
