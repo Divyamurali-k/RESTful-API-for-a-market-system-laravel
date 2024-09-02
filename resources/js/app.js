@@ -15,8 +15,14 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
+import PersonalAccessTokens from './components/passport/PersonalAccessTokens.vue';
+app.component('passport-personal-access-tokens', PersonalAccessTokens);
+
+import Clients from './components/passport/Clients.vue';
+app.component('passport-clients', Clients);
+
+import AuthorizedClients from './components/passport/AuthorizedClients.vue';
+app.component('passport-authorized-clients', AuthorizedClients);
 
 /**
  * The following block of code may be used to automatically register your

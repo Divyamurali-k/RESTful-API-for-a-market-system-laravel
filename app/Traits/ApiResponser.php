@@ -122,4 +122,8 @@ trait ApiResponser
             return $data;
         });
     }
+    protected function isFrontend($request)
+    {
+        return $request->acceptsHtml() && collect($request->route()->middleware())->contains('web');
+    }
 }

@@ -6,12 +6,15 @@ use App\Mail\UserCreated;
 use App\Mail\UserMailChanged;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
+    
     /**
      * Register any application services.
      */
@@ -26,6 +29,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+        // Passport::loadKeysFrom(__DIR__.'../../storage');
+        // Passport::routes();
+        Passport::enableImplicitGrant();
+        Passport::enablePasswordGrant();
+        Passport::tokensCan([
+            'purchase-product' => 'Create a new transaction for a specific product',
+            'manage-products' => 'Create, read, update, and delete products (CRUD)',
+            'manage-account' => 'Read your account data, id, name, email, if verified, and if admin (cannot read password). Modify your account data (email, and password). Cannot delete your account',
+            'read-general' => 'Read general information like purchasing categories, purchased products, selling products, selling categories, your transactions (purchases and sales)',
+        ]);
+        Passport::tokensExpireIn(now()->addMinutes(30));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        // Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
 
         User::created(function ($user) {
 
@@ -49,5 +66,9 @@ class AppServiceProvider extends ServiceProvider
                 $product->save();
             }
         });
+        
+    
     }
+ 
+
 }

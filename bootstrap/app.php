@@ -17,24 +17,28 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 // use Throwable;
 
+use App\Traits\ApiResponser;
+use Laravel\Passport\Http\Middleware\CheckClientCredentials;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        // web: __DIR__.'/../routes/web.php',
-        // api: __DIR__.'/../routes/api.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
 
-        using: function () {
-            Route::middleware('api')
-                ->group(base_path('routes/api.php'));
+        // using: function () {
+        //     Route::middleware('api')
+        //         ->group(base_path('routes/api.php'));
 
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
-        }
+        //     Route::middleware('web')
+        //         ->group(base_path('routes/web.php'));
+        // }
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'transform.input' => TransformInput::class,
+            'client.credentials' => CheckClientCredentials::class,
+            'transform.input' => TransformInput::class,     
         ]);
         // $middleware->append(TransformInput::class);
         $middleware->group('web', [
@@ -51,17 +55,33 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->group('api', [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \App\Http\Middleware\SignatureMiddleware::class,
-
+            // 'signature:X-Application-Name',
+            //  'client.credentials',
+            //  'transform.input' ,
             'throttle:50,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
     })
     ->withExceptions(function (Exceptions $exceptions) {
+
         $exceptions->render(function (ValidationException $e, Request $request) {
             return response()->json([
                 'errors' => $e->errors(),'code'=>'422'
             ], 422);
+       
+        });
+
+        $exceptions->render(function (ValidationException $e, $request) {
+            $errors = $e->validator->errors()->getMessages();
+            
+            if ($this->isFrontend($request)) {
+                return $request->ajax() ? response()->json($errors, 422) : redirect()
+                    ->back()
+                    ->withInput($request->input())
+                    ->withErrors($errors);
+            }
+            return response()->json($errors, 422);
         });
 
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
@@ -75,6 +95,11 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'error' => 'Unauthenticated.','code'=>'401'
             ], 401);
+            // if ($this->isFrontend($request)) {
+            //     return redirect()->guest('login');
+            // }
+    
+            // return $this->errorResponse('Unauthenticated.', 401);
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {
@@ -133,20 +158,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 500);
         });
 
-        $exceptions->render(function (ValidationException $e, $request) {
-            $errors = $e->validator->errors()->getMessages();
-            if ($this->isFrontend($request)) {
-                return $request->ajax() ? response()->json($errors, 422) : redirect()
-                    ->back()
-                    ->withInput($request->input())
-                    ->withErrors($errors);
-            }
-            return $this->errorResponse($errors, 422);
-        });
+     
         
         
-    })
-    ->create();
+    })->create();
     
-
+    
     
