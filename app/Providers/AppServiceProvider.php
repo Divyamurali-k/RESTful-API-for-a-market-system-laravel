@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use App\Models\Passport\PersonalAccessClient;
+use App\Models\Passport\RefreshToken;
+use App\Models\Passport\Token;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         // Passport::loadKeysFrom(__DIR__.'../../storage');
         // Passport::routes();
+        // Passport::useTokenModel(Token::class);
+        // Passport::useRefreshTokenModel(RefreshToken::class);
+        // Passport::useAuthCodeModel(AuthCode::class);
+
         Passport::enableImplicitGrant();
         Passport::enablePasswordGrant();
         Passport::tokensCan([

@@ -19,6 +19,9 @@ use Illuminate\Http\Request;
 
 use App\Traits\ApiResponser;
 use Laravel\Passport\Http\Middleware\CheckClientCredentials;
+use Laravel\Passport\Http\Middleware\CheckForAnyScope;
+use Laravel\Passport\Http\Middleware\CheckScopes;
+use Lcobucci\JWT\Token\Signature;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,7 +41,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'client.credentials' => CheckClientCredentials::class,
-            'transform.input' => TransformInput::class,     
+            'scope'=>CheckForAnyScope::class,
+            'scopes'=>CheckScopes::class,
+            'signature'=>SignatureMiddleware::class,
+            'transform.input' => TransformInput::class,
         ]);
         // $middleware->append(TransformInput::class);
         $middleware->group('web', [
