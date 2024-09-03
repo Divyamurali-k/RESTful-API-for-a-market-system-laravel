@@ -17,15 +17,14 @@ class UserController extends ApiController
     public function __construct()
     {
         // parent::__construct();
-        $this->middleware('client.credentials')->only(['store','resend']);
-        $this->middleware('auth:api')->except(['store','verify','resend']);
-        $this->middleware('transform.input:' . UserTransformer::class)->only(['store','update']);
+        $this->middleware('client.credentials')->only(['store', 'resend']);
+        $this->middleware('auth:api')->except(['store', 'verify', 'resend']);
+        $this->middleware('transform.input:' . UserTransformer::class)->only(['store', 'update']);
 
-        $this->middleware('scope:manage-account')->only(['show','update']);
+        $this->middleware('scope:manage-account')->only(['show', 'update']);
         $this->middleware('can:view,user')->only('show');
         $this->middleware('can:update,user')->only('update');
         $this->middleware('can:delete,user')->only('destroy');
-
     }
     /**
      * Display a listing of the resource.
@@ -49,7 +48,7 @@ class UserController extends ApiController
             'password' => 'required|min:6|confirmed',
 
         ];
-        
+
         $this->validate($request, $rules);
 
         $data = $request->all();
@@ -84,7 +83,7 @@ class UserController extends ApiController
      */
     public function update(Request $request, User $user)
     {
-       
+
         // $user = User::findOrFail($id);
         $rules = [
             'email' => 'email|unique:users,email,' . $user->id,
@@ -139,6 +138,12 @@ class UserController extends ApiController
         return response()->json(['data' => $user], 200);
     }
 
+    public function me(Request $request)
+    {
+        $user = $request->user();
+        return $this->showOne($user);
+    }
+
     public function verify($token)
     {
 
@@ -152,15 +157,16 @@ class UserController extends ApiController
         return $this->showMessage('The account has been verified successfully');
     }
 
-    public function resend(User $user){
-        
+    public function resend(User $user)
+    {
+
         if ($user->isVerified()) {
             return $this->errorResponse('This user is already verified', 409);
         }
 
-        retry(5, function() use ($user) {
-                Mail::to($user)->send(new UserCreated($user));
-            }, 100);
+        retry(5, function () use ($user) {
+            Mail::to($user)->send(new UserCreated($user));
+        }, 100);
 
         return $this->showMessage('The verification email has been resend');
     }
