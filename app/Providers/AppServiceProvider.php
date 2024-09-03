@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Mail\UserCreated;
 use App\Mail\UserMailChanged;
+use App\Models\Buyer;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -14,10 +15,26 @@ use Laravel\Passport\Passport;
 use App\Models\Passport\PersonalAccessClient;
 use App\Models\Passport\RefreshToken;
 use App\Models\Passport\Token;
+use App\Models\Seller;
+use App\Models\Transaction;
+use App\Policies\BuyerPolicy;
+use App\Policies\ProductPolicy;
+use App\Policies\SellerPolicy;
+use App\Policies\TransactionPolicy;
+use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
-    
+
+    protected $policies = [
+        Buyer::class => BuyerPolicy::class,
+        Product::class=>ProductPolicy::class,
+        Seller::class => SellerPolicy::class,
+        Transaction::class => TransactionPolicy::class,
+        User::class => UserPolicy::class,
+        
+    ];
     /**
      * Register any application services.
      */
@@ -31,6 +48,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Gate::policy(Buyer::class, BuyerPolicy::class);
+        // Gate::policy(Seller::class, SellerPolicy::class);
+        // Gate::policy(User::class, UserPolicy::class);
+        // Gate::policy(Transaction::class, TransactionPolicy::class);
+        Gate::define('admin-action', function ($user) {
+            return $user->isAdmin();
+        });
+
         Schema::defaultStringLength(191);
         // Passport::loadKeysFrom(__DIR__.'../../storage');
         // Passport::routes();
@@ -73,9 +98,5 @@ class AppServiceProvider extends ServiceProvider
                 $product->save();
             }
         });
-        
-    
     }
- 
-
 }
