@@ -81,7 +81,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button " class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <!-- <button type="button " class="close" @click="hideCreateClientForm" data-dismiss="modal" aria-hidden="true">&times;</button> -->
 
                         <h4 class="modal-title">
                             Create Client
@@ -134,7 +134,7 @@
 
                     <!-- Modal Actions -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default"  @click="hideCreateClientForm" data-dismiss="modal">Close</button>
 
                         <button type="button" class="btn btn-primary" @click="store">
                             Create
@@ -149,7 +149,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button " class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <!-- <button type="button " class="close" data-dismiss="modal"  @click="hideEditClientForm" aria-hidden="true">&times;</button> -->
 
                         <h4 class="modal-title">
                             Edit Client
@@ -202,7 +202,7 @@
 
                     <!-- Modal Actions -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default"  @click="hideEditClientForm" data-dismiss="modal">Close</button>
 
                         <button type="button" class="btn btn-primary" @click="update">
                             Save Changes
@@ -282,6 +282,14 @@
              */
             showCreateClientForm() {
                 $('#modal-create-client').modal('show');
+            },
+
+            hideCreateClientForm() {
+                $('#modal-create-client').modal('hide');
+            },
+
+            hideEditClientForm() {
+                $('#modal-edit-client').modal('hide');
             },
 
             /**

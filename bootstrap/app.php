@@ -98,14 +98,16 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
+           
             return response()->json([
                 'error' => 'Unauthenticated.','code'=>'401'
             ], 401);
+
             // if ($this->isFrontend($request)) {
             //     return redirect()->guest('login');
             // }
-    
-            // return $this->errorResponse('Unauthenticated.', 401);
+
+            return $this->errorResponse('Unauthenticated.', 401);
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {

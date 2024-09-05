@@ -13,6 +13,22 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Popper.js (required for Bootstrap 4.x and 5.x) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+
+{{-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"> --}}
+{{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> --}}
+{{-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> --}}
+{{-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> --}}
+<script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>
+
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
@@ -31,9 +47,15 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
                         @if (Auth::check())
-                        <li><a href="{{route('personal-tokens')}}">My Tokens</a></li>
-                        <li><a href="{{route('personal-clients')}}">My Clients</a></li>
-                        <li><a href="{{route('authorized-clients')}}">Authorized Clients</a></li>
+                        <li class="list-group-item me-2">
+                            <a href="{{route('personal-tokens')}}" class="list-group-item-action text-decoration-none">My Tokens</a>
+                          </li>
+                          <li class="list-group-item me-2">
+                            <a href="{{route('personal-clients')}}" class="list-group-item-action text-decoration-none">My Clients</a>
+                          </li>
+                          <li class="list-group-item me-2">
+                            <a href="{{route('authorized-clients')}}" class="list-group-item-action text-decoration-none">Authorized Clients</a>
+                          </li>
                         @endif
                     </ul>
 
